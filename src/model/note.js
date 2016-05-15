@@ -1,8 +1,8 @@
-import mongoose from 'mongose';
+import mongoose from 'mongoose';
 
-const schema = mongoose.Schema({
+const schema = new mongoose.Schema({
   title: String,
   body: String
 });
 
-export default mongoose.Model('note', schema);
+export default mongoose.model('note', schema);
