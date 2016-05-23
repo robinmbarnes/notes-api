@@ -29,5 +29,8 @@
     "presets": [
       "es2015-node5"
     ]
+  },
+  "devDependencies": {
+    "node-inspector": "^0.12.8"
   }
 }

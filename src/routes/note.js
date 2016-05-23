@@ -20,11 +20,24 @@ export function * retrieve () {
 }
 
 export function * list () {
-  this.body = yield Note.find();
+  this.body = yield Note.find().sort({ position: -1 });
 }
 
 export function * create () {
-  const note = new Note(this.request.body);
+  let position = 0;
+  try {
+    const maxPositionResult = yield Note.aggregate({
+      $group: {
+        _id: 0,
+        maxPosition: { $max: '$position' }
+      }
+    }).exec();
+    const [{ maxPosition }] = maxPositionResult;
+    position = maxPosition + 1;
+  } catch (err) {
+    // Don't care, just means there are 0 notes
+  }
+  const note = new Note(Object.assign({}, this.request.body, { position }));
   yield note.save();
   this.body = note;
 }

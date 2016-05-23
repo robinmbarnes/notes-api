@@ -20,3 +20,4 @@ db.once('open', () => {
 
 app.on('error', logger.error.bind(logger));
 app.listen(8100);
+console.log('http://localhost:8100')
