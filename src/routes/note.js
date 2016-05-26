@@ -48,7 +48,23 @@ export function * update () {
     throw new NotFoundError();
   }
   const postData = ramda.omit(['_id'], this.request.body);
+  const currentPosition = note.position;
+  const newPosition = postData.position;
   updateModelFields(note, postData);
+  if (currentPosition !== newPosition) {
+    if (newPosition < currentPosition) {
+      yield Note.update({
+        position: { $gte: newPosition, $lt: currentPosition }
+      }, {
+        $inc: { position: 1 }
+      });
+    } else {
+      yield Note.update({
+        position: { $lte: newPosition, $gt: currentPosition }
+      }, { $inc: { $position: -1 }
+    });
+    }
+  }
   yield note.save();
   this.body = note;
 }
