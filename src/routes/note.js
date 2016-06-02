@@ -1,4 +1,5 @@
 import Note from 'model/note';
+import { updatePositions } from 'model/note';
 import { updateModelFields } from 'utils/model';
 import ramda from 'ramda';
 import NotFoundError from 'errors/not-found-error';
@@ -38,6 +39,7 @@ export function * create () {
     // Don't care, just means there are 0 notes
   }
   const note = new Note(Object.assign({}, this.request.body, { position }));
+  yield updatePositions(void 0, position);
   yield note.save();
   this.body = note;
 }
@@ -51,20 +53,7 @@ export function * update () {
   const currentPosition = note.position;
   const newPosition = postData.position;
   updateModelFields(note, postData);
-  if (currentPosition !== newPosition) {
-    if (newPosition < currentPosition) {
-      yield Note.update({
-        position: { $gte: newPosition, $lt: currentPosition }
-      }, {
-        $inc: { position: 1 }
-      });
-    } else {
-      yield Note.update({
-        position: { $lte: newPosition, $gt: currentPosition }
-      }, { $inc: { $position: -1 }
-    });
-    }
-  }
+  yield updatePositions(currentPosition, newPosition);
   yield note.save();
   this.body = note;
 }
@@ -74,6 +63,7 @@ export function * remove () {
   if (!note) {
     throw new NotFoundError();
   }
+  yield updatePositions(note.position);
   yield Note.remove({ _id: note._id });
   this.response.status = 204;
 
